@@ -5,6 +5,9 @@ import os
 from pathlib import Path
 import platform
 
+# os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+os.environ["UNSLOTH_USE_MODELSCOPE"] = "1"
+
 if platform.system() in ("Windows", "Darwin"):
     from project_settings import project_path
 else:
@@ -49,20 +52,15 @@ def get_args():
 
 def convert_to_qwen_format(example):
     """
-
     :param example: {"conversation_id": 612, "category": "", "conversation": [{"human": "", "assistant": ""}], "dataset": ""}
-    :return:
     """
-    conversations = []
+    conversation_ = []
     for conversation in example["conversation"]:
-        for turn in conversation:
-            conversations.append([
-                {"role": "user", "content": turn["human"].strip()},
-                {"role": "assistant", "content": turn["assistant"].strip()},
-            ])
-    result = {"conversations": conversations}
-    print(result)
-    exit(0)
+        conversation_.append([
+            {"role": "user", "content": conversation["human"].strip()},
+            {"role": "assistant", "content": conversation["assistant"].strip()},
+        ])
+    result = {"conversation": conversation_}
     return result
 
 
@@ -79,34 +77,29 @@ def main():
         full_finetuning=False
     )
 
-    # model = FastLanguageModel.get_peft_model(
-    #     model,
-    #     r=32,  # Choose any number > 0! Suggested 8, 16, 32, 64, 128
-    #     target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
-    #                     "gate_proj", "up_proj", "down_proj", ],
-    #     lora_alpha=32,  # Best to choose alpha = rank or rank*2
-    #     lora_dropout=0,  # Supports any, but = 0 is optimized
-    #     bias="none",  # Supports any, but = "none" is optimized
-    #     # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
-    #     use_gradient_checkpointing="unsloth",  # True or "unsloth" for very long context
-    #     random_state=3407,
-    #     use_rslora=False,  # rank stabilized LoRA
-    #     loftq_config=None,  # LoftQ
-    # )
-    # print(model)
+    model = FastLanguageModel.get_peft_model(
+        model,
+        r=32,  # Choose any number > 0! Suggested 8, 16, 32, 64, 128
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
+                        "gate_proj", "up_proj", "down_proj", ],
+        lora_alpha=32,  # Best to choose alpha = rank or rank*2
+        lora_dropout=0,  # Supports any, but = 0 is optimized
+        bias="none",  # Supports any, but = "none" is optimized
+        # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
+        use_gradient_checkpointing="unsloth",  # True or "unsloth" for very long context
+        random_state=3407,
+        use_rslora=False,  # rank stabilized LoRA
+        loftq_config=None,  # LoftQ
+    )
+    print(model)
 
     def format_func(example):
-        formatted_texts = []
-        for conv in example['conversations']:
-            formatted_texts.append(
-                tokenizer.apply_chat_template(
-                    conv,
-                    tokenize=False,  # 训练时部分词，true返回的是张量
-                    add_generation_prompt=False,  # 训练期间要关闭，如果是推理则设为True
-                )
-            )
-
-        return {"text": formatted_texts}
+        formated_text = tokenizer.apply_chat_template(
+            example["conversation"],
+            tokenize=False,  # 训练时部分词，true返回的是张量
+            add_generation_prompt=False,  # 训练期间要关闭，如果是推理则设为True
+        )
+        return {"text": formated_text}
 
     dataset_dict = load_dataset(
         path=args.dataset_path,
@@ -123,15 +116,15 @@ def main():
 
     train_dataset = train_dataset.map(
         convert_to_qwen_format,
-        batched=True,
-        remove_columns=train_dataset.column_names
+        batched=False,
+        remove_columns=["conversation_id", "category", "dataset"]
     )
     print(train_dataset)
 
     train_dataset = train_dataset.map(
         format_func,
-        batched=True,
-        remove_columns=train_dataset.column_names
+        batched=False,
+        remove_columns=["conversation_id", "category", "dataset"]
     )
     print(train_dataset)
 
