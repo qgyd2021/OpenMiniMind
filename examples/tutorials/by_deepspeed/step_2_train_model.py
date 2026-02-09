@@ -66,17 +66,19 @@ def main():
     os.environ["MODELSCOPE_CACHE"] = args.model_cache_dir
 
     model = AutoModelForCausalLM.from_pretrained(
-        pretrained_model_name_or_path=args.model_name,
+        pretrained_model_name_or_path="/root/autodl-tmp/OpenMiniMind/hub_models/models/Qwen/Qwen3-8B",
+        # pretrained_model_name_or_path=args.model_name,
         quantization_config=None,
         # device_map="auto",
         trust_remote_code=True,
-        cache_dir=args.model_cache_dir,
+        # cache_dir=args.model_cache_dir,
     )
     print(model)
     tokenizer = AutoTokenizer.from_pretrained(
-        pretrained_model_name_or_path=args.model_name,
+        pretrained_model_name_or_path="/root/autodl-tmp/OpenMiniMind/hub_models/models/Qwen/Qwen3-8B",
+        # pretrained_model_name_or_path=args.model_name,
         trust_remote_code=True,
-        cache_dir=args.model_cache_dir,
+        # cache_dir=args.model_cache_dir,
     )
     print(tokenizer)
 
