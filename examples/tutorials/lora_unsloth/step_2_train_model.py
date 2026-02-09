@@ -62,7 +62,8 @@ def main():
         dtype=None,
         load_in_4bit=True,
         load_in_8bit=False,
-        full_finetuning=False
+        full_finetuning=False,
+        cache_dir=args.model_cache_dir,
     )
 
     model = FastLanguageModel.get_peft_model(

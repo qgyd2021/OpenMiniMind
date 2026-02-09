@@ -55,6 +55,7 @@ def main():
         device_map="auto",
         dtype=None,  # 自动选择最优精度
         load_in_4bit=True,  # 4bit量化节省70%显存
+        cache_dir=args.model_cache_dir,
     )
 
     # 2、注入lora适配器

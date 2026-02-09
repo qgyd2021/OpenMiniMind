@@ -66,11 +66,13 @@ def main():
         pretrained_model_name_or_path=args.model_name,
         quantization_config=bnb_config,
         device_map="auto",
-        trust_remote_code=True
+        trust_remote_code=True,
+        cache_dir=args.model_cache_dir,
     )
     tokenizer = AutoTokenizer.from_pretrained(
         pretrained_model_name_or_path=args.model_name,
-        trust_remote_code=True
+        trust_remote_code=True,
+        cache_dir=args.model_cache_dir,
     )
     peft_config = LoraConfig(
         r=32,  # LoRA秩

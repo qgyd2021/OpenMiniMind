@@ -40,6 +40,11 @@ def get_args():
         default=(project_path / "hub_datasets").as_posix(),
         type=str
     ),
+    parser.add_argument(
+        "--model_cache_dir",
+        default=(project_path / "hub_models").as_posix(),
+        type=str
+    ),
     parser.add_argument("--dataset_streaming", default=None, type=str),
     parser.add_argument("--valid_dataset_size", default=100, type=str),
     parser.add_argument("--shuffle_buffer_size", default=5000, type=str),
@@ -60,11 +65,13 @@ def main():
         pretrained_model_name_or_path=args.model_name,
         quantization_config=None,
         # device_map="auto",
-        trust_remote_code=True
+        trust_remote_code=True,
+        cache_dir=args.model_cache_dir,
     )
     tokenizer = AutoTokenizer.from_pretrained(
         pretrained_model_name_or_path=args.model_name,
-        trust_remote_code=True
+        trust_remote_code=True,
+        cache_dir=args.model_cache_dir,
     )
     print(model)
 
