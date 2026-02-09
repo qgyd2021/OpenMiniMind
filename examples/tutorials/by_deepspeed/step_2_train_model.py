@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""
+deepspeed --num_gpus=4 step_2_train_model.py
+"""
 import argparse
 import os
 from pathlib import Path
@@ -23,6 +26,8 @@ import torch
 
 def get_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--local_rank", type=int, default=-1, help="Local rank passed from distributed launcher")
+
     parser.add_argument(
         "--model_name",
         default="Qwen/Qwen3-8B",

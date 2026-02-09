@@ -2,3 +2,4 @@ datasets
 unsloth
 modelscope
 transformers==4.57.1
+deepspeed
