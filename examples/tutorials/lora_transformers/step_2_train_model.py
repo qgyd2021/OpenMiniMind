@@ -171,7 +171,7 @@ def main():
     # 只保存lora适配器参数
     trained_models_dir = project_path / "trained_models" / "Qwen3-8B-sft-lora-adapter-transformers"
     trained_models_dir.mkdir(parents=True, exist_ok=True)
-    model.save_pretrained(trained_models_dir.as_posix())
+    trainer.model.save_pretrained(trained_models_dir.as_posix())
     tokenizer.save_pretrained(trained_models_dir.as_posix())
 
     # trained_models_dir = project_path / "trained_models" / "Qwen3-8B-sft-fp16"
