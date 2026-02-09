@@ -50,20 +50,6 @@ def get_args():
     return args
 
 
-def convert_to_qwen_format(example):
-    """
-    :param example: {"conversation_id": 612, "category": "", "conversation": [{"human": "", "assistant": ""}], "dataset": ""}
-    """
-    conversation_ = []
-    for conversation in example["conversation"]:
-        conversation_.append([
-            {"role": "user", "content": conversation["human"].strip()},
-            {"role": "assistant", "content": conversation["assistant"].strip()},
-        ])
-    result = {"conversation": conversation_}
-    return result
-
-
 def main():
     args = get_args()
 
@@ -99,7 +85,7 @@ def main():
             tokenize=False,  # 训练时部分词，true返回的是张量
             add_generation_prompt=False,  # 训练期间要关闭，如果是推理则设为True
         )
-        return {"text": formated_text}
+        return {"formated_text": formated_text}
 
     dataset_dict = load_dataset(
         path=args.dataset_path,
@@ -115,19 +101,70 @@ def main():
     train_dataset = dataset_dict["train"]
 
     train_dataset = train_dataset.map(
-        convert_to_qwen_format,
-        batched=False,
-        remove_columns=["conversation_id", "category", "dataset"]
-    )
-    print(train_dataset)
-
-    train_dataset = train_dataset.map(
         format_func,
         batched=False,
-        remove_columns=["conversation_id", "category", "dataset"]
     )
     print(train_dataset)
 
+    trainer = SFTTrainer(
+        model=model,
+        # processing_class = tokenizer,
+        # tokenizer=tokenizer,
+        train_dataset=train_dataset,
+        eval_dataset=None,  # Can set up evaluation!
+        args=SFTConfig(
+            dataset_text_field="formated_text",
+            per_device_train_batch_size=8,
+            gradient_accumulation_steps=4,  # Use GA to mimic batch size!
+            warmup_steps=5,
+            num_train_epochs=1,  # Set this for 1 full training run.
+            # max_steps = 30,
+            learning_rate=2e-4,  # Reduce to 2e-5 for long training runs
+            logging_steps=1,
+            optim="adamw_8bit",
+            weight_decay=0.01,
+            lr_scheduler_type="linear",
+            seed=3407,
+            report_to="none",  # Use this for WandB etc
+        ),
+    )
+
+    # 显示当前内存统计信息
+    gpu_stats = torch.cuda.get_device_properties(0)
+    start_gpu_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
+    max_memory = round(gpu_stats.total_memory / 1024 / 1024 / 1024, 3)
+    print(f"GPU = {gpu_stats.name}. Max memory = {max_memory} GB.")
+    print(f"{start_gpu_memory} GB of memory reserved.")
+
+    trainer_stats = trainer.train()
+
+    # 显示最终内存和时间统计信息
+    used_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
+    used_memory_for_lora = round(used_memory - start_gpu_memory, 3)
+    used_percentage = round(used_memory / max_memory * 100, 3)
+    lora_percentage = round(used_memory_for_lora / max_memory * 100, 3)
+    print(f"{trainer_stats.metrics['train_runtime']} seconds used for training.")
+    print(
+        f"{round(trainer_stats.metrics['train_runtime'] / 60, 2)} minutes used for training."
+    )
+    print(f"Peak reserved memory = {used_memory} GB.")
+    print(f"Peak reserved memory for training = {used_memory_for_lora} GB.")
+    print(f"Peak reserved memory % of max memory = {used_percentage} %.")
+    print(f"Peak reserved memory for training % of max memory = {lora_percentage} %.")
+
+    # ==================== 4.保存训练结果 ====================================
+    # 只保存lora适配器参数
+    trained_models_dir = project_path / "trained_models" / "Qwen3-8B-sft-lora-adapter-unsloth"
+    trained_models_dir.mkdir(parents=True, exist_ok=True)
+    model.save_pretrained(trained_models_dir.as_posix())
+    tokenizer.save_pretrained(trained_models_dir.as_posix())
+
+    # trained_models_dir = project_path / "trained_models" / "Qwen3-8B-sft-fp16"
+    # trained_models_dir.mkdir(parents=True, exist_ok=True)
+    # model.save_pretrained_merged(trained_models_dir.as_posix(), tokenizer, save_method="merged_16bit",)
+    # trained_models_dir = project_path / "trained_models" / "Qwen3-8B-sft-int4"
+    # trained_models_dir.mkdir(parents=True, exist_ok=True)
+    # model.save_pretrained_merged(trained_models_dir.as_posix(), tokenizer, save_method="merged_4bit",)
     return
 
 
