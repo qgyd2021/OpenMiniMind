@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import platform
 
-# os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 
 if platform.system() in ("Windows", "Darwin"):
     from project_settings import project_path
@@ -66,7 +66,6 @@ def main():
     os.environ["MODELSCOPE_CACHE"] = args.model_cache_dir
 
     model = AutoModelForCausalLM.from_pretrained(
-        # pretrained_model_name_or_path="/root/autodl-tmp/OpenMiniMind/hub_models/models/Qwen/Qwen3-8B",
         pretrained_model_name_or_path=args.model_name,
         quantization_config=None,
         # device_map="auto",
@@ -75,7 +74,6 @@ def main():
     )
     print(model)
     tokenizer = AutoTokenizer.from_pretrained(
-        # pretrained_model_name_or_path="/root/autodl-tmp/OpenMiniMind/hub_models/models/Qwen/Qwen3-8B",
         pretrained_model_name_or_path=args.model_name,
         trust_remote_code=True,
         # cache_dir=args.model_cache_dir,
