@@ -46,8 +46,8 @@ def get_args():
         type=str
     ),
     parser.add_argument("--dataset_streaming", default=None, type=str),
-    parser.add_argument("--valid_dataset_size", default=None, type=str),
-    parser.add_argument("--shuffle_buffer_size", default=None, type=str),
+    parser.add_argument("--valid_dataset_size", default=1000, type=str),
+    parser.add_argument("--shuffle_buffer_size", default=5000, type=str),
 
     parser.add_argument(
         "--max_new_tokens",

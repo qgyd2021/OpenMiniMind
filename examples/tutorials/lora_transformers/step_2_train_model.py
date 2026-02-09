@@ -6,7 +6,6 @@ from pathlib import Path
 import platform
 
 # os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
-os.environ["UNSLOTH_USE_MODELSCOPE"] = "1"
 
 if platform.system() in ("Windows", "Darwin"):
     from project_settings import project_path
@@ -14,7 +13,9 @@ else:
     project_path = os.path.abspath("../../../")
     project_path = Path(project_path)
 
-from unsloth import FastLanguageModel
+from peft import LoraConfig
+# from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from modelscope import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from trl import SFTTrainer, SFTConfig
 from datasets import load_dataset
 import torch
@@ -55,29 +56,32 @@ def get_args():
 def main():
     args = get_args()
 
-    model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name=args.model_name,
-        max_seq_length=2048,
-        device_map="auto",
-        dtype=None,
-        load_in_4bit=True,
-        load_in_8bit=False,
-        full_finetuning=False
+    bnb_config = BitsAndBytesConfig(
+        load_in_4bit=True,  # 启用4-bit量化
+        bnb_4bit_quant_type="nf4",  # 量化类型
+        bnb_4bit_compute_dtype=torch.float16,
+        bnb_4bit_use_double_quant=True  # 嵌套量化节省更多内存
     )
-
-    model = FastLanguageModel.get_peft_model(
-        model,
-        r=32,  # Choose any number > 0! Suggested 8, 16, 32, 64, 128
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
-                        "gate_proj", "up_proj", "down_proj", ],
-        lora_alpha=32,  # Best to choose alpha = rank or rank*2
-        lora_dropout=0,  # Supports any, but = 0 is optimized
-        bias="none",  # Supports any, but = "none" is optimized
-        # [NEW] "unsloth" uses 30% less VRAM, fits 2x larger batch sizes!
-        use_gradient_checkpointing="unsloth",  # True or "unsloth" for very long context
-        random_state=3407,
-        use_rslora=False,  # rank stabilized LoRA
-        loftq_config=None,  # LoftQ
+    model = AutoModelForCausalLM.from_pretrained(
+        pretrained_model_name_or_path=args.model_name,
+        quantization_config=bnb_config,
+        device_map="auto",
+        trust_remote_code=True
+    )
+    tokenizer = AutoTokenizer.from_pretrained(
+        pretrained_model_name_or_path=args.model_name,
+        trust_remote_code=True
+    )
+    peft_config = LoraConfig(
+        r=32,  # LoRA秩
+        lora_alpha=32,  # 缩放因子
+        target_modules=[
+            "q_proj", "k_proj", "v_proj", "o_proj",
+            "gate_proj", "up_proj", "down_proj"
+        ],
+        lora_dropout=0.,  # Dropout率
+        bias="none",  # 偏置处理方式
+        task_type="CAUSAL_LM"  # 任务类型
     )
     print(model)
 
@@ -119,18 +123,19 @@ def main():
 
     trainer = SFTTrainer(
         model=model,
-        # processing_class = tokenizer,
+        processing_class=tokenizer,
         # tokenizer=tokenizer,
+        peft_config=peft_config,
         train_dataset=train_dataset,
         eval_dataset=None,  # Can set up evaluation!
         args=SFTConfig(
-            dataset_text_field="formated_text",
-            per_device_train_batch_size=8,
-            gradient_accumulation_steps=4,  # Use GA to mimic batch size!
+            dataset_text_field="text",
+            per_device_train_batch_size=1,
+            gradient_accumulation_steps=2,  # Use GA to mimic batch size!
             warmup_steps=5,
             num_train_epochs=1,  # Set this for 1 full training run.
             # max_steps = 30,
-            learning_rate=2e-5,  # Reduce to 2e-5 for long training runs
+            learning_rate=2e-4,  # Reduce to 2e-5 for long training runs
             logging_steps=1,
             optim="adamw_8bit",
             weight_decay=0.01,
