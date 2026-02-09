@@ -80,7 +80,7 @@ def main():
     inputs = tokenizer(format_messages, return_tensors="pt").to(model.device)
 
     # 5、调用model.generate()
-    outputs = model.generate(
+    generated_ids = model.generate(
         **inputs,
         max_new_tokens=args.max_new_tokens, do_sample=True,
         streamer=TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True),
@@ -88,10 +88,8 @@ def main():
         top_p=args.top_p, temperature=args.temperature, repetition_penalty=1.0,
     )
 
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    # 只输出回答部分
-
-    print(response)
+    response = tokenizer.decode(generated_ids[0][len(inputs["input_ids"][0]):], skip_special_tokens=True)
+    print(f"response: {response}")
     return
 
 
