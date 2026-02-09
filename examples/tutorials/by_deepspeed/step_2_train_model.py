@@ -25,7 +25,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--model_name",
-        default="unsloth/Qwen3-8B-unsloth-bnb-4bit",
+        default="unsloth/Qwen3-8B",
         type=str
     )
     parser.add_argument(
@@ -41,7 +41,7 @@ def get_args():
         type=str
     ),
     parser.add_argument("--dataset_streaming", default=None, type=str),
-    parser.add_argument("--valid_dataset_size", default=1000, type=str),
+    parser.add_argument("--valid_dataset_size", default=100, type=str),
     parser.add_argument("--shuffle_buffer_size", default=5000, type=str),
 
     parser.add_argument(
@@ -56,32 +56,15 @@ def get_args():
 def main():
     args = get_args()
 
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,  # 启用4-bit量化
-        bnb_4bit_quant_type="nf4",  # 量化类型
-        bnb_4bit_compute_dtype=torch.float16,
-        bnb_4bit_use_double_quant=True  # 嵌套量化节省更多内存
-    )
     model = AutoModelForCausalLM.from_pretrained(
         pretrained_model_name_or_path=args.model_name,
-        quantization_config=bnb_config,
-        device_map="auto",
+        quantization_config=None,
+        # device_map="auto",
         trust_remote_code=True
     )
     tokenizer = AutoTokenizer.from_pretrained(
         pretrained_model_name_or_path=args.model_name,
         trust_remote_code=True
-    )
-    peft_config = LoraConfig(
-        r=32,  # LoRA秩
-        lora_alpha=32,  # 缩放因子
-        target_modules=[
-            "q_proj", "k_proj", "v_proj", "o_proj",
-            "gate_proj", "up_proj", "down_proj"
-        ],
-        lora_dropout=0.,  # Dropout率
-        bias="none",  # 偏置处理方式
-        task_type="CAUSAL_LM"  # 任务类型
     )
     print(model)
 
@@ -115,7 +98,7 @@ def main():
         train_dataset = dataset["train"]
         valid_dataset = dataset["test"]
 
-    # train_dataset = valid_dataset
+    train_dataset = valid_dataset
     train_dataset = train_dataset.map(
         format_func,
         batched=False,
@@ -124,23 +107,22 @@ def main():
 
     trainer = SFTTrainer(
         model=model,
-        processing_class=tokenizer,
-        # tokenizer=tokenizer,
-        peft_config=peft_config,
+        processing_class=tokenizer,  # 新写法
         train_dataset=train_dataset,
         eval_dataset=None,  # Can set up evaluation!
         args=SFTConfig(
             dataset_text_field="formated_text",
+            deepspeed="./ds_config/deepspeed_stage_3_config.json",  # 添加deepspeed配置文件
             per_device_train_batch_size=1,
-            gradient_accumulation_steps=2,  # Use GA to mimic batch size!
-            warmup_steps=5,
+            gradient_accumulation_steps=64,  # Use GA to mimic batch size!
+            warmup_steps=100,
             num_train_epochs=1,  # Set this for 1 full training run.
             # max_steps = 30,
-            learning_rate=2e-5,  # Reduce to 2e-5 for long training runs
+            learning_rate=3e-5,  # Reduce to 2e-5 for long training runs
             logging_steps=1,
             optim="adamw_8bit",
-            weight_decay=0.01,
-            lr_scheduler_type="linear",
+            weight_decay=0,
+            lr_scheduler_type="constant_with_warmup",
             seed=3407,
             report_to="none",  # Use this for WandB etc
         ),

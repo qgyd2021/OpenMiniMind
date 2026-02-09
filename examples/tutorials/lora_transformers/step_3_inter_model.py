@@ -69,7 +69,7 @@ def main():
 
     # 注入lora适配器
     model = PeftModel.from_pretrained(model, args.lora_adapter_path)
-    # model.merge_and_unload()
+    # model.merge_and_unload()  #这一步，真正将LoRA的AB矩阵融入进取。
     model.eval()
     # print(model)
 
