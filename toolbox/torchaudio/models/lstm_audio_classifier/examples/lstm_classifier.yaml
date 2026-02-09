@@ -1,0 +1,29 @@
+model_name: "lstm_audio_classifier"
+
+mel_spectrogram_param:
+  sample_rate: 8000
+  n_fft: 512
+  win_length: 200
+  hop_length: 80
+  f_min: 10
+  f_max: 3800
+  window_fn: hamming
+  n_mels: 80
+
+lstm_layer_param:
+  input_size: 80
+  hidden_size: 64
+  num_layers: 3
+  dropout: 0.2
+
+pooling_layer_param:
+  pool_layer: last
+
+cls_head_param:
+  input_dim: 64
+  num_layers: 1
+  hidden_dims:
+    - 32
+  activations: relu
+  dropout: 0.1
+  num_labels: 4
