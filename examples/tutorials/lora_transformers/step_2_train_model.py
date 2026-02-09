@@ -104,6 +104,7 @@ def main():
         streaming=args.dataset_streaming,
     )
     dataset = dataset_dict["train"]
+    print(dataset)
 
     if args.dataset_streaming:
         valid_dataset = dataset.take(args.valid_dataset_size)
@@ -119,7 +120,6 @@ def main():
         batched=False,
         remove_columns=train_dataset.column_names,
     )
-    print(train_dataset)
 
     trainer = SFTTrainer(
         model=model,
@@ -135,7 +135,7 @@ def main():
             warmup_steps=5,
             num_train_epochs=1,  # Set this for 1 full training run.
             # max_steps = 30,
-            learning_rate=2e-4,  # Reduce to 2e-5 for long training runs
+            learning_rate=2e-5,  # Reduce to 2e-5 for long training runs
             logging_steps=1,
             optim="adamw_8bit",
             weight_decay=0.01,

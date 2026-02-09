@@ -100,6 +100,7 @@ def main():
         streaming=args.dataset_streaming,
     )
     dataset = dataset_dict["train"]
+    print(dataset)
 
     if args.dataset_streaming:
         valid_dataset = dataset.take(args.valid_dataset_size)
