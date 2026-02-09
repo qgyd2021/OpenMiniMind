@@ -29,10 +29,10 @@ def get_chat_template_tab():
             "jingyaogong/MiniMind2",
 
         ]
-        ct_model_name = gr.Dropdown(choices=model_name_choices, value=model_name_choices[0], label="model_name")
+        ct_model_name = gr.Dropdown(choices=model_name_choices, value=model_name_choices[0], label="model_name", allow_custom_value=True)
         ct_conversation = gr.Textbox(label="conversation")
         ct_add_generation_prompt = gr.Checkbox(label="add_generation_prompt")
-        ct_tokenize = gr.Button("tokenize")
+        ct_tokenize = gr.Button("tokenize", variant="primary")
         ct_output = gr.Textbox(label="output", max_lines=100)
 
         ct_tokenize.click(
@@ -45,6 +45,11 @@ def get_chat_template_tab():
             examples=[
                 [
                     json.dumps([{"role": "user", "content": "帮我识别出文本中的关键词：\n凉山彝族社会中的\"尔普\"(份子钱)是一种礼物交换形式.对\"尔普\"的研究和分析,可有助于人们理解凉山彝族社会.\"尔普\"本来是维系彝族传统社会宗族内部亲属组织的纽带,由于文化变迁的原因,后来发展出了跨宗族的\"尔普\"新形式,又由于族群互动的原因,还产生了跨越族群的\"尔普\"形式.\"尔普\"形式的变迁是族群互动下的一种文化变迁形式,其动力来源于彝、汉两族的互动关系.彝族社会中\"尔普\"的变迁形式是人类学关于族群互动下的文化变迁理论的鲜活事例."}, {"role": "assistant", "content": "彝族;尔普;礼物交换;族群互动"}], ensure_ascii=False),
+                    "Qwen/Qwen3-8B",
+                    True,
+                ],
+                [
+                    json.dumps([{"role": "system", "content": "你是一个有帮助的助手，可以调用工具来获取信息。可用工具：[工具描述JSON]"}, {"role": "user", "content": "查询北京和上海的天气对比"}, {"role": "assistant", "content": "用户想比较两地的天气，我需要分别查询。", "tool_calls": [{"id": "call_1", "type": "function", "function": {"name": "get_weather", "arguments": "{\"location\": \"北京\"}"}}, {"id": "call_2", "type": "function", "function": {"name": "get_weather", "arguments": "{\"location\": \"上海\"}"}}]}, {"role": "tool", "content": "{\"weather\": \"sunny\", \"temperature\": 22}", "tool_call_id": "call_1"}, {"role": "tool", "content": "{\"weather\": \"cloudy\", \"temperature\": 24}", "tool_call_id": "call_2"}, {"role": "assistant", "content": "北京：晴天，22°C；上海：多云，24°C。两地温差不大，上海稍暖一些。"}]),
                     "Qwen/Qwen3-8B",
                     True,
                 ]
