@@ -11,10 +11,10 @@ else:
     project_path = os.path.abspath("../../../")
     project_path = Path(project_path)
 
-# from unsloth import FastLanguageModel
-# from trl import SFTTrainer, SFTConfig
+from unsloth import FastLanguageModel
+from trl import SFTTrainer, SFTConfig
 from datasets import load_dataset
-# import torch
+import torch
 
 
 def get_args():
