@@ -129,7 +129,7 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=None,  # Can set up evaluation!
         args=SFTConfig(
-            dataset_text_field="text",
+            dataset_text_field="formated_text",
             per_device_train_batch_size=1,
             gradient_accumulation_steps=2,  # Use GA to mimic batch size!
             warmup_steps=5,
@@ -168,7 +168,6 @@ def main():
     print(f"Peak reserved memory % of max memory = {used_percentage} %.")
     print(f"Peak reserved memory for training % of max memory = {lora_percentage} %.")
 
-    # ==================== 4.保存训练结果 ====================================
     # 只保存lora适配器参数
     trained_models_dir = project_path / "trained_models" / "Qwen3-8B-sft-lora-adapter-transformers"
     trained_models_dir.mkdir(parents=True, exist_ok=True)

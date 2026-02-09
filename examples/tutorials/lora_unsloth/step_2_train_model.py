@@ -163,7 +163,6 @@ def main():
     print(f"Peak reserved memory % of max memory = {used_percentage} %.")
     print(f"Peak reserved memory for training % of max memory = {lora_percentage} %.")
 
-    # ==================== 4.保存训练结果 ====================================
     # 只保存lora适配器参数
     trained_models_dir = project_path / "trained_models" / "Qwen3-8B-sft-lora-adapter-unsloth"
     trained_models_dir.mkdir(parents=True, exist_ok=True)
