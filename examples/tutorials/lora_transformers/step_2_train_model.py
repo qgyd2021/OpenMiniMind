@@ -27,7 +27,7 @@ def get_args():
         "--model_name",
         default="unsloth/Qwen3-8B-unsloth-bnb-4bit",
         type=str
-    )
+    ),
     parser.add_argument(
         "--dataset_path",
         default="miyuki2026/tutorials",
@@ -37,7 +37,14 @@ def get_args():
     parser.add_argument("--dataset_split", default=None, type=str),
     parser.add_argument(
         "--dataset_cache_dir",
-        default=(project_path / "hub_datasets").as_posix(),
+        # default=(project_path / "hub_datasets").as_posix(),
+        default="/root/autodl-tmp/OpenMiniMind/hub_datasets",
+        type=str
+    ),
+    parser.add_argument(
+        "--model_cache_dir",
+        # default=(project_path / "hub_models").as_posix(),
+        default="/root/autodl-tmp/OpenMiniMind/hub_models",
         type=str
     ),
     parser.add_argument("--dataset_streaming", default=None, type=str),
@@ -55,6 +62,8 @@ def get_args():
 
 def main():
     args = get_args()
+
+    os.environ["MODELSCOPE_CACHE"] = args.model_cache_dir
 
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,  # 启用4-bit量化

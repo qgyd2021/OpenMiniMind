@@ -23,19 +23,25 @@ def get_args():
         "--model_name",
         default="unsloth/Qwen3-8B-unsloth-bnb-4bit",
         type=str
-    )
+    ),
+    parser.add_argument(
+        "--model_cache_dir",
+        # default=(project_path / "hub_models").as_posix(),
+        default="/root/autodl-tmp/OpenMiniMind/hub_models",
+        type=str
+    ),
     parser.add_argument(
         "--lora_adapter_path",
         default=(project_path / "trained_models" / "Qwen3-8B-sft-lora-adapter-unsloth").as_posix(),
         type=str
-    )
+    ),
     parser.add_argument(
         "--max_new_tokens",
         default=1024, # 8192, 128
         type=int, help="最大生成长度（注意：并非模型实际长文本能力）"
-    )
-    parser.add_argument("--top_p", default=0.85, type=float, help="nucleus采样阈值（0-1）")
-    parser.add_argument("--temperature", default=0.85, type=float, help="生成温度，控制随机性（0-1，越大越随机）")
+    ),
+    parser.add_argument("--top_p", default=0.85, type=float, help="nucleus采样阈值（0-1）"),
+    parser.add_argument("--temperature", default=0.85, type=float, help="生成温度，控制随机性（0-1，越大越随机）"),
 
     parser.add_argument(
         "--num_workers",
@@ -48,6 +54,8 @@ def get_args():
 
 def main():
     args = get_args()
+
+    os.environ["MODELSCOPE_CACHE"] = args.model_cache_dir
 
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=args.model_name,

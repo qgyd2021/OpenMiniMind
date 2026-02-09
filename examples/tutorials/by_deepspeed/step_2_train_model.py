@@ -27,7 +27,7 @@ def get_args():
         "--model_name",
         default="Qwen/Qwen3-8B",
         type=str
-    )
+    ),
     parser.add_argument(
         "--dataset_path",
         default="miyuki2026/tutorials",
@@ -72,12 +72,13 @@ def main():
         trust_remote_code=True,
         cache_dir=args.model_cache_dir,
     )
+    print(model)
     tokenizer = AutoTokenizer.from_pretrained(
         pretrained_model_name_or_path=args.model_name,
         trust_remote_code=True,
         cache_dir=args.model_cache_dir,
     )
-    print(model)
+    print(tokenizer)
 
     def format_func(example):
         formated_text = tokenizer.apply_chat_template(
