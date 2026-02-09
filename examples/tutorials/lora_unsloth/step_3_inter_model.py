@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import platform
 
+os.environ["UNSLOTH_USE_MODELSCOPE"] = "1"
+
 if platform.system() in ("Windows", "Darwin"):
     from project_settings import project_path
 else:
