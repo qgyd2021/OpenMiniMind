@@ -52,6 +52,11 @@ def get_chat_template_tab():
                     json.dumps([{"role": "system", "content": "你是一个有帮助的助手，可以调用工具来获取信息。可用工具：[工具描述JSON]"}, {"role": "user", "content": "查询北京和上海的天气对比"}, {"role": "assistant", "content": "用户想比较两地的天气，我需要分别查询。", "tool_calls": [{"id": "call_1", "type": "function", "function": {"name": "get_weather", "arguments": "{\"location\": \"北京\"}"}}, {"id": "call_2", "type": "function", "function": {"name": "get_weather", "arguments": "{\"location\": \"上海\"}"}}]}, {"role": "tool", "content": "{\"weather\": \"sunny\", \"temperature\": 22}", "tool_call_id": "call_1"}, {"role": "tool", "content": "{\"weather\": \"cloudy\", \"temperature\": 24}", "tool_call_id": "call_2"}, {"role": "assistant", "content": "北京：晴天，22°C；上海：多云，24°C。两地温差不大，上海稍暖一些。"}]),
                     "Qwen/Qwen3-8B",
                     True,
+                ],
+                [
+                    json.dumps([{"role": "system", "content": "你是一个有帮助的助手，可以调用工具来获取信息。可用工具：[工具描述JSON]"}, {"role": "user", "content": "查询北京和上海的天气对比"}, {"role": "assistant", "content": "用户想比较两地的天气，我需要分别查询。", "tool_calls": [{"id": "call_1", "type": "function", "function": {"name": "get_weather", "arguments": "{\"location\": \"北京\"}"}}, {"id": "call_2", "type": "function", "function": {"name": "get_weather", "arguments": "{\"location\": \"上海\"}"}}]}, {"role": "tool", "content": "{\"weather\": \"sunny\", \"temperature\": 22}", "tool_call_id": "call_2"}, {"role": "tool", "content": "{\"weather\": \"cloudy\", \"temperature\": 24}", "tool_call_id": "call_1"}, {"role": "assistant", "content": "北京：晴天，22°C；上海：多云，24°C。两地温差不大，上海稍暖一些。"}]),
+                    "Qwen/Qwen3-8B",
+                    True,
                 ]
             ],
             inputs=[ct_conversation, ct_model_name, ct_add_generation_prompt],
