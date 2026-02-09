@@ -41,6 +41,9 @@ def get_args():
     ),
     parser.add_argument("--dataset_streaming", default=None, type=str),
 
+    parser.add_argument("--valid_dataset_size", default=None, type=str),
+    parser.add_argument("--shuffle_buffer_size", default=None, type=str),
+
     parser.add_argument(
         "--num_workers",
         default=None if platform.system() == "Windows" else os.cpu_count() // 2,
@@ -97,8 +100,16 @@ def main():
         # num_proc=args.num_workers if not args.dataset_streaming else None,
         streaming=args.dataset_streaming,
     )
-    print(dataset_dict)
-    train_dataset = dataset_dict["train"]
+    dataset = dataset_dict["train"]
+
+    if args.dataset_streaming:
+        valid_dataset = dataset.take(args.valid_dataset_size)
+        train_dataset = dataset.skip(args.valid_dataset_size)
+        train_dataset = train_dataset.shuffle(buffer_size=args.shuffle_buffer_size, seed=None)
+    else:
+        dataset = dataset.train_test_split(test_size=args.valid_dataset_size, seed=None)
+        train_dataset = dataset["train"]
+        valid_dataset = dataset["test"]
 
     train_dataset = train_dataset.map(
         format_func,
