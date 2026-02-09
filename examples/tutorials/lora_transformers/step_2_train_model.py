@@ -41,7 +41,7 @@ def get_args():
         type=str
     ),
     parser.add_argument("--dataset_streaming", default=None, type=str),
-    parser.add_argument("--valid_dataset_size", default=1000, type=str),
+    parser.add_argument("--valid_dataset_size", default=100, type=str),
     parser.add_argument("--shuffle_buffer_size", default=5000, type=str),
 
     parser.add_argument(
@@ -115,6 +115,7 @@ def main():
         train_dataset = dataset["train"]
         valid_dataset = dataset["test"]
 
+    train_dataset = valid_dataset
     train_dataset = train_dataset.map(
         format_func,
         batched=False,
@@ -176,10 +177,10 @@ def main():
 
     # trained_models_dir = project_path / "trained_models" / "Qwen3-8B-sft-fp16"
     # trained_models_dir.mkdir(parents=True, exist_ok=True)
-    # model.save_pretrained_merged(trained_models_dir.as_posix(), tokenizer, save_method="merged_16bit",)
+    # trainer.model.save_pretrained_merged(trained_models_dir.as_posix(), tokenizer, save_method="merged_16bit",)
     # trained_models_dir = project_path / "trained_models" / "Qwen3-8B-sft-int4"
     # trained_models_dir.mkdir(parents=True, exist_ok=True)
-    # model.save_pretrained_merged(trained_models_dir.as_posix(), tokenizer, save_method="merged_4bit",)
+    # trainer.model.save_pretrained_merged(trained_models_dir.as_posix(), tokenizer, save_method="merged_4bit",)
     return
 
 
