@@ -14,8 +14,8 @@ else:
     project_path = Path(project_path)
 
 from peft import LoraConfig
-# from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-from modelscope import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+# from modelscope import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from trl import SFTTrainer, SFTConfig
 from datasets import load_dataset
 import torch
@@ -63,7 +63,7 @@ def get_args():
 def main():
     args = get_args()
 
-    os.environ["MODELSCOPE_CACHE"] = args.model_cache_dir
+    # os.environ["MODELSCOPE_CACHE"] = args.model_cache_dir
 
     model = AutoModelForCausalLM.from_pretrained(
         pretrained_model_name_or_path="/root/autodl-tmp/OpenMiniMind/hub_models/models/Qwen/Qwen3-8B",
