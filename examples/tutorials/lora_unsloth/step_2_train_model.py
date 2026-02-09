@@ -103,6 +103,7 @@ def main():
     train_dataset = train_dataset.map(
         format_func,
         batched=False,
+        remove_columns=train_dataset.column_names,
     )
     print(train_dataset)
 
