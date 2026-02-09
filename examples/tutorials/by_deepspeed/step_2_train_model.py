@@ -63,6 +63,8 @@ def get_args():
 def main():
     args = get_args()
 
+    os.environ["MODELSCOPE_CACHE"] = args.model_cache_dir
+
     model = AutoModelForCausalLM.from_pretrained(
         pretrained_model_name_or_path=args.model_name,
         quantization_config=None,
