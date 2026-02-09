@@ -37,12 +37,14 @@ def get_args():
     parser.add_argument("--dataset_split", default=None, type=str),
     parser.add_argument(
         "--dataset_cache_dir",
-        default=(project_path / "hub_datasets").as_posix(),
+        # default=(project_path / "hub_datasets").as_posix(),
+        default="/root/autodl-tmp/OpenMiniMind/hub_datasets",
         type=str
     ),
     parser.add_argument(
         "--model_cache_dir",
-        default=(project_path / "hub_models").as_posix(),
+        # default=(project_path / "hub_models").as_posix(),
+        default="/root/autodl-tmp/OpenMiniMind/hub_models",
         type=str
     ),
     parser.add_argument("--dataset_streaming", default=None, type=str),
