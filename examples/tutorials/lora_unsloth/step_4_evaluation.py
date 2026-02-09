@@ -17,6 +17,7 @@ else:
 from datasets import load_dataset
 from unsloth import FastLanguageModel
 from transformers import TextStreamer
+from tqdm import tqdm
 
 
 def get_args():
@@ -110,7 +111,7 @@ def main():
         valid_dataset = dataset["test"]
 
     with open(output_file.as_posix(), "w", encoding="utf-8") as f:
-        for example in valid_dataset:
+        for example in tqdm(valid_dataset):
             conversation = example["conversation"]
             prompt = conversation[:-1]
             response = conversation[-1]["content"]
@@ -133,7 +134,7 @@ def main():
             )
 
             response_: str = tokenizer.decode(generated_ids[0][len(inputs["input_ids"][0]):], skip_special_tokens=True)
-            response_ = response_.split("</thinking>")[-1].strip()
+            response_ = response_.split("</think>")[-1].strip()
 
             row = {
                 "prompt": prompt,
