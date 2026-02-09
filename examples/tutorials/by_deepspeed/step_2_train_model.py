@@ -25,7 +25,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--model_name",
-        default="unsloth/Qwen3-8B",
+        default="Qwen/Qwen3-8B",
         type=str
     )
     parser.add_argument(
